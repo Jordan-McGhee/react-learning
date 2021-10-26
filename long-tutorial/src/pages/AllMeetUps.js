@@ -1,4 +1,6 @@
 import MeetUpList from "../components/meetups/MeetUpList";
+import { useState, useEffect } from "react";
+
 const DUMMY_DATA = [
     {
         id: 'm1',
@@ -21,10 +23,47 @@ const DUMMY_DATA = [
 ];
 
 function AllMeetUpsPage() {
-    return <div>
-        <h1>All Meetups</h1>
-        <MeetUpList meetups = {DUMMY_DATA} />
-    </div>
-}
+    const [isLoading, setIsLoading] = useState(true);
+    const [loadedMeetUps, setLoadedMeetups] = useState([])
+
+    useEffect(() => {
+        setIsLoading(true);
+
+        fetch(
+            "https://react-tutorial-4d1fb-default-rtdb.firebaseio.com/meetups.json"
+        ).then(response => {
+            return response.json()
+        }).then(data => {
+
+            const meetups = [];
+
+            for (const key in data) {
+                const meetup = {
+                    id: key,
+                    ...data[key]
+                }
+
+                meetups.push(meetup)
+            }
+
+            setIsLoading(false)
+            setLoadedMeetups(meetups)
+        })
+    }, []);
+
+    if (isLoading) {
+        return(
+            <section>
+                <p>Loading...</p>
+            </section>
+        )
+    }
+
+    return (
+        <div>
+            <h1>All Meetups</h1>
+            <MeetUpList meetups = {loadedMeetUps} />
+        </div>
+    )}
 
 export default AllMeetUpsPage;
